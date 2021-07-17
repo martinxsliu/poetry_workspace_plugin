@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "poetry-workspace-plugin"
+version = "0.1.0"
+description = "Multi project workspace plugin for Poetry"
+authors = ["Martin Liu <martin.xs.liu@gmail.com>"]
+readme = "README.md"
+packages = [{include = "poetry_workspace"}]
+
+[tool.poetry.plugins."poetry.application.plugin"]
+poetry-workspace-plugin = "poetry_workspace.plugin:WorkspacePlugin"
+
+[tool.poetry.dependencies]
+python = "^3.6.2"
+poetry = {version = "^1.2.0a2", allow-prereleases = true}
+
+[tool.poetry.group.dev.dependencies]
+black = "^21.7-beta.0"
+isort = "^5.9.3"
+
+[tool.black]
+line-length = 120
+target-version = ['py36', 'py37', 'py38', 'py39']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

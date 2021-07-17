@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "root"
+version = "0.1.0"
+description = ""
+authors = ["Martin Liu <martin.xs.liu@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry_workspace]
+paths = ["projects/*"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
