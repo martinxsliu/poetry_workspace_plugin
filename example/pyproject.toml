@@ -3,10 +3,10 @@ name = "root"
 version = "0.1.0"
 description = ""
 authors = ["Martin Liu <martin.xs.liu@gmail.com>"]
-readme = "README.md"
 
 [tool.poetry_workspace]
-paths = ["projects/*"]
+include = ["projects/*"]
+exclude = ["projects/experimental"]
 
 [tool.poetry.dependencies]
 python = "^3.8"

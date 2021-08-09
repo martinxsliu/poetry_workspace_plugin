@@ -1,11 +1,11 @@
 .PHONY: fmt
 fmt:
-	black poetry_workspace
-	isort poetry_workspace
+	poetry run black poetry_workspace
+	poetry run isort poetry_workspace
 
 .PHONY: reinstall
 reinstall:
-	python install-poetry.py --uninstall
+	python install-poetry.py --uninstall || true
 	python install-poetry.py --preview
 	poetry plugin add $(shell pwd)
 
