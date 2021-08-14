@@ -10,7 +10,8 @@ run_libb = "libb:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pytz = ">=2020.4"
+liba = {path = "../liba"}
+pytz = ">=2020.1"
 
 [tool.poetry.dev-dependencies]
 

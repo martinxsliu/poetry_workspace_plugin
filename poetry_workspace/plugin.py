@@ -11,6 +11,7 @@ from poetry.plugins import ApplicationPlugin
 from poetry.poetry import Poetry
 from poetry.utils.env import EnvManager, SystemEnv, VirtualEnv
 
+from poetry_workspace.commands.workspace import WORKSPACE_COMMANDS, WorkspaceCommand
 from poetry_workspace.workspace import Workspace
 
 if TYPE_CHECKING:
@@ -22,6 +23,9 @@ if TYPE_CHECKING:
 
 class WorkspacePlugin(ApplicationPlugin):
     def activate(self, application: "Application") -> None:
+        for command in WORKSPACE_COMMANDS:
+            application.command_loader.register_factory(command.name, command)
+
         dispatcher = application.event_dispatcher
         dispatcher.add_listener(COMMAND, self.on_command, priority=1000)
 
@@ -39,6 +43,9 @@ class WorkspacePlugin(ApplicationPlugin):
 
         if isinstance(command, InstallerCommand):
             self.set_installer_poetry(command, event.io)
+
+        if isinstance(command, WorkspaceCommand):
+            command.set_workspace(self._workspace)
 
     def set_installer_poetry(self, command: InstallerCommand, io: "IO") -> None:
         poetry = Poetry(

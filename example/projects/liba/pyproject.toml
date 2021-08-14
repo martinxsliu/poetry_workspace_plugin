@@ -10,6 +10,7 @@ run_liba = "liba:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
+pendulum = "^2.1.2"
 pytz = ">=2020,<2021"
 
 [tool.poetry.dev-dependencies]

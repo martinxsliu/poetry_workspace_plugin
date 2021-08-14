@@ -35,3 +35,6 @@ var/
 
 # Mac
 .DS_Store
+
+# Local environment variables
+.envrc
