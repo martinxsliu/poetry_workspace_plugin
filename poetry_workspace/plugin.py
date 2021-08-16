@@ -5,6 +5,7 @@ from cleo.events.console_events import COMMAND
 from poetry.console.commands.installer_command import EnvCommand, InstallerCommand
 from poetry.core.factory import Factory as BaseFactory
 from poetry.core.pyproject.toml import PyProjectTOML
+from poetry.core.version.pep440.version import PEP440Version
 from poetry.factory import Factory
 from poetry.plugins import ApplicationPlugin
 from poetry.poetry import Poetry
@@ -26,6 +27,8 @@ class WorkspacePlugin(ApplicationPlugin):
 
     def on_command(self, event: "ConsoleCommandEvent", _event_name: str, _dispatcher: "EventDispatcher") -> None:
         command = event.command
+
+        self.monkeypatch_version_parser()
 
         self._workspace = find_workspace(command.application, event.io)
         if self._workspace is None:
@@ -64,6 +67,18 @@ class WorkspacePlugin(ApplicationPlugin):
             return original_method(self, *args, **kwargs)
 
         EnvManager.create_venv = create_venv
+
+    def monkeypatch_version_parser(self) -> None:
+        """
+        Workaround for https://github.com/python-poetry/poetry/issues/4176.
+        """
+        original_method = PEP440Version.parse
+
+        def parse(cls, value: str):
+            value = value.rstrip(".")
+            return original_method.__func__(cls, value)
+
+        PEP440Version.parse = classmethod(parse)
 
 
 def find_workspace(application: "Application", io: "IO") -> Optional[Workspace]:
