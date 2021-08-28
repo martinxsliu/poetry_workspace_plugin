@@ -27,7 +27,7 @@ class WorkspaceCommand(Command):
         self._workspace = None
         self._graph = None
 
-        super(WorkspaceCommand, self).__init__()
+        super().__init__()
 
     @property
     def workspace(self) -> "Workspace":

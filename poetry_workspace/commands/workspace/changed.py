@@ -21,7 +21,11 @@ external to the workspace in the dependency list."""
         option(
             "include-reverse-dependencies", "r", "Include projects that transitively depend on the changed projects."
         ),
-        option("include-external", "e", "Check for changes to external dependencies (requires --include-reverse-dependencies)."),
+        option(
+            "include-external",
+            "e",
+            "Check for changes to external dependencies (requires --include-reverse-dependencies).",
+        ),
     ]
 
     def handle(self) -> int:
