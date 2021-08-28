@@ -32,7 +32,7 @@ external to the workspace in the dependency list."""
         from poetry_workspace.diff import Diff
 
         if not self.workspace:
-            self.io.write_line("The 'workspace' command is only supported from within a workspace")
+            self.io.write_line("<error>The 'workspace' command is only supported from within a workspace</error>")
             return 1
 
         ref = self.argument("reference")
