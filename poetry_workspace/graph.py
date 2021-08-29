@@ -112,14 +112,14 @@ def topological_sort(
     levels: Dict["Package", int] = defaultdict(int)
 
     def iter(package: "Package", level: int) -> None:
-        if levels[package] >= level:
+        if levels[package] <= level:
             return
         levels[package] = level
         for dep in deps[package]:
-            iter(dep, level + 1)
+            iter(dep, level - 1)
 
     for package, rdeps in rdeps.items():
         if len(rdeps) == 0:
-            iter(package, 1)
+            iter(package, -1)
 
     return levels
