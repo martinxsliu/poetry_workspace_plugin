@@ -8,7 +8,10 @@ if TYPE_CHECKING:
 COMMAND_NAMES = [
     "build",
     "release",
+    "workspace build",
     "workspace list",
+    "workspace publish",
+    "workspace release",
 ]
 
 

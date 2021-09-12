@@ -8,6 +8,7 @@ from poetry_workspace.workspace import Workspace
 
 if TYPE_CHECKING:
     from poetry.core.packages.package import Package
+    from poetry.poetry import Poetry
 
 
 class WorkspaceCommand(Command):
@@ -39,28 +40,33 @@ class WorkspaceCommand(Command):
 
     def handle(self) -> int:
         if not self.workspace:
-            self.io.write_line("<error>The 'workspace' command is only supported from within a workspace</error>")
+            self.line("The 'workspace' command is only supported from within a workspace", style="error")
             return 1
 
-        status = self.pre_handle()
-        if status != 0:
-            return status
+        exit_code = self.pre_handle()
+        if exit_code:
+            return exit_code
 
         for project in self.selected_projects():
-            status = self.handle_each(project)
-            if status != 0:
-                return status
+            poetry = self.workspace.find_project(project.name)
+            if not poetry:
+                self.line(f"Project {project.name} not found in workspace", style="error")
+                return 1
 
-        status = self.post_handle()
-        if status != 0:
-            return status
+            exit_code = self.handle_each(poetry)
+            if exit_code:
+                return exit_code
+
+        exit_code = self.post_handle()
+        if exit_code:
+            return exit_code
 
         return 0
 
     def pre_handle(self) -> int:
         return 0
 
-    def handle_each(self, project: "Package") -> int:
+    def handle_each(self, poetry: "Poetry") -> int:
         """To be implemented by workspace subcommands."""
         raise NotImplementedError()
 
@@ -78,7 +84,7 @@ class WorkspaceCommand(Command):
     def selected_projects(self, include_external: bool = False) -> List["Package"]:
         if self.option("since"):
             if self.option("project"):
-                self.io.write_line("<warning>Both --project and --since flags are provided, using --since</warning>")
+                self.line("Both --project and --since flags are provided, using --since", style="warning")
             return self.changed_projects(include_external)
 
         return self.graph.search(

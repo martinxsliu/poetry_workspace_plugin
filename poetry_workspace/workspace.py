@@ -1,5 +1,5 @@
 from glob import glob
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from poetry.core.packages.directory_dependency import DirectoryDependency
 from poetry.factory import Factory
@@ -31,6 +31,11 @@ class Workspace:
     @property
     def projects(self) -> List["Poetry"]:
         return self._projects
+
+    def find_project(self, name: str) -> Optional["Poetry"]:
+        for project in self.projects:
+            if project.package.name == name:
+                return project
 
     def _find_projects(self, pyproject: "PyProjectTOML") -> List["Poetry"]:
         content = pyproject.data["tool"]["poetry_workspace"]

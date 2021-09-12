@@ -14,7 +14,7 @@ class ReleaseCommand(Command):
 
     def handle(self) -> int:
         if not self.poetry.pyproject.is_poetry_project():
-            self.io.write_line("<error>Not a valid Poetry project</error>")
+            self.line("Not a valid Poetry project", style="error")
             return 1
 
         version = self.poetry.package.version
@@ -25,8 +25,11 @@ class ReleaseCommand(Command):
         elif self.option("patch"):
             bump = version.next_patch()
         else:
-            self.io.write_line("<error>Please specify a version part to bump</error>")
+            self.line("Please specify a version part to bump", style="error")
             return 1
+
+        package = self.poetry.package
+        self.line(f"Releasing <c1>{package.pretty_name}</c1> (<c2>{package.version}</c2> -> <c2>{str(bump)}</c2>)")
 
         self.poetry.pyproject.poetry_config["version"] = str(bump)
         self.poetry.pyproject.save()
