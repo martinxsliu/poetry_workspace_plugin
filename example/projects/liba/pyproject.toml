@@ -6,7 +6,8 @@ authors = ["Martin Liu <martin.xs.liu@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.scripts]
-run_liba = "liba:main"
+run = "liba:main"
+run_slow = "liba:main_slow"
 
 [tool.poetry.dependencies]
 python = "^3.8"

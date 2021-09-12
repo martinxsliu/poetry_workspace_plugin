@@ -12,6 +12,7 @@ COMMAND_NAMES = [
     "workspace list",
     "workspace publish",
     "workspace release",
+    "workspace run",
 ]
 
 
