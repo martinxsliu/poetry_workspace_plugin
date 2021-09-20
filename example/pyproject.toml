@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Martin Liu <martin.xs.liu@gmail.com>"]
 
-[tool.poetry_workspace]
+[tool.poetry.workspace]
 include = ["projects/*"]
 exclude = ["projects/experimental"]
 

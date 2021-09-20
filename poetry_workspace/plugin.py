@@ -1,8 +1,10 @@
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Union
 
 from cleo.events.console_events import COMMAND
 from poetry.console.commands.installer_command import EnvCommand, InstallerCommand
+from poetry.core import json
 from poetry.core.factory import Factory as BaseFactory
 from poetry.core.pyproject.toml import PyProjectTOML
 from poetry.core.version.pep440.version import PEP440Version
@@ -33,6 +35,7 @@ class WorkspacePlugin(ApplicationPlugin):
         command = event.command
 
         self.monkeypatch_version_parser()
+        self.monkeypatch_json_schema()
 
         self._workspace = find_workspace(command.application, event.io)
         if self._workspace is None:
@@ -87,6 +90,9 @@ class WorkspacePlugin(ApplicationPlugin):
 
         PEP440Version.parse = classmethod(parse)
 
+    def monkeypatch_json_schema(self) -> None:
+        json.SCHEMA_DIR = os.path.join(os.path.dirname(__file__), "schemas")
+
 
 def find_workspace(application: "Application", io: "IO") -> Optional[Workspace]:
     cwd = Path.cwd()
@@ -107,4 +113,4 @@ def find_workspace(application: "Application", io: "IO") -> Optional[Workspace]:
 
 
 def is_workspace_pyproject(pyproject: "PyProjectTOML") -> bool:
-    return pyproject.file.exists() and bool(pyproject.data.get("tool", {}).get("poetry_workspace"))
+    return pyproject.file.exists() and bool(pyproject.data.get("tool", {}).get("poetry", {}).get("workspace"))

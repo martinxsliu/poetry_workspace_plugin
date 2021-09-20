@@ -38,7 +38,7 @@ class Workspace:
                 return project
 
     def _find_projects(self, pyproject: "PyProjectTOML") -> List["Poetry"]:
-        content = pyproject.data["tool"]["poetry_workspace"]
+        content = pyproject.data["tool"]["poetry"]["workspace"]
         if "include" not in content:
             raise KeyError("Workspace pyproject.toml file requires 'include' in the 'tool.poetry_workspace' section")
 
