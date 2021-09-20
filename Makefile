@@ -5,8 +5,8 @@ fmt:
 
 .PHONY: reinstall
 reinstall:
-	python install-poetry.py --uninstall || true
-	python install-poetry.py --preview
+	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python - --uninstall || true
+	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python - --preview
 	poetry plugin add $(shell pwd)
 
 .PHONY: publish
