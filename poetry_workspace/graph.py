@@ -56,11 +56,11 @@ class DependencyGraph:
     def is_project_package(self, package: "Package") -> bool:
         return package.source_url in self._internal_urls
 
-    def dependencies(self, package: "Package") -> List["Package"]:
-        return self._deps[package]
+    def dependencies(self, name: str) -> List["Package"]:
+        return self._deps[self.find_package(name)]
 
-    def reverse_dependencies(self, package: "Package") -> List["Package"]:
-        return self._rdeps[package]
+    def reverse_dependencies(self, name: str) -> List["Package"]:
+        return self._rdeps[self.find_package(name)]
 
     def search(
         self,
@@ -76,10 +76,7 @@ class DependencyGraph:
 
         selected = set()
         for name in package_names:
-            results = self._repo.search(name)
-            if not results:
-                raise GraphError(f"Project '{name}' is not in the dependency graph")
-            selected.add(results[0])
+            selected.add(self.find_package(name))
 
         def add_dep(acc: Set["Package"], package: "Package", deps: Dict["Package", List["Package"]]) -> None:
             if package in acc:
@@ -103,6 +100,12 @@ class DependencyGraph:
             results = {package for package in results if self.is_project_package(package)}
 
         return sorted(results, key=lambda package: (self._levels[package], package.name))
+
+    def find_package(self, name: str) -> "Package":
+        results = self._repo.search(name)
+        if not results:
+            raise GraphError(f"Project '{name}' is not in the dependency graph")
+        return results[0]
 
 
 def topological_sort(

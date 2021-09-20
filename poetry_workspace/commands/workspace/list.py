@@ -40,51 +40,62 @@ external to the workspace in the dependency list."""
     def output(self) -> str:
         return self.option("output")
 
-    def pre_handle(self) -> int:
+    @property
+    def show_external(self) -> bool:
+        return self.option("show-external")
+
+    def handle(self) -> int:
+        if not self.workspace:
+            self.line("The 'workspace' command is only supported from within a workspace", style="error")
+            return 1
+
         if self.output not in _FORMATS:
             self.line("unknown output format", style="error")
             return 1
-        return 0
 
-    def handle_each(self, poetry: "Poetry", _io: "IO") -> int:
-        package = poetry.package
-        if self.output == "topological":
-            self.line(package.name)
-            return 0
+        for project in self.selected_projects():
+            if self.output == "topological":
+                self.line(project.name)
+                continue
 
-        def get_tree(package: "Package") -> dict:
-            return {dep.name: get_tree(dep) for dep in self.graph.dependencies(package)}
+            def get_tree(package_name: str) -> dict:
+                deps = self.graph.dependencies(package_name)
+                if not self.show_external:
+                    deps = [dep for dep in deps if self.graph.is_project_package(dep)]
+                return {dep.name: get_tree(dep.name) for dep in deps}
 
-        self._project_tree[package.name] = get_tree(package)
-        return 0
+            self._project_tree[project.name] = get_tree(project.name)
 
-    def post_handle(self) -> int:
         if self.output == "json":
             import json
 
             self.line(json.dumps(self._project_tree, indent=2))
         elif self.output == "tree":
             for project_name, tree in self._project_tree.items():
-                self.write_tree(project_name, tree, 0, False)
+                self.write_tree(project_name, tree, [])
                 self.line("")
 
         return 0
 
-    def write_tree(self, project_name: str, tree: dict, levels: int, last_item: bool) -> None:
-        for level in range(levels):
-            if level != levels - 1:
-                self.io.write("│   ")
-            elif not last_item:
-                self.io.write("├── ")
+    def write_tree(self, project_name: str, tree: dict, last_levels: List[bool]) -> None:
+        for i, is_last in enumerate(last_levels):
+            if i != len(last_levels) - 1:
+                if not is_last:
+                    self.io.write("│   ")
+                else:
+                    self.io.write("    ")
             else:
-                self.io.write("└── ")
+                if not is_last:
+                    self.io.write("├── ")
+                else:
+                    self.io.write("└── ")
 
         self.line(project_name)
         for i, (dep_name, dep_tree) in enumerate(tree.items()):
-            self.write_tree(dep_name, dep_tree, levels + 1, i == len(tree) - 1)
+            self.write_tree(dep_name, dep_tree, last_levels + [i == len(tree) - 1])
 
     def selected_projects(self, *args) -> List["Package"]:
-        projects = super().selected_projects(self.option("show-external"))
+        projects = super().selected_projects(self.show_external)
         if self.output in ("json", "tree"):
             projects = sorted(projects, key=lambda project: project.name)
         return projects

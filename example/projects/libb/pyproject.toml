@@ -12,6 +12,7 @@ run_slow = "libb:main_slow"
 [tool.poetry.dependencies]
 python = "^3.8"
 liba = {path = "../liba"}
+pendulum = "^2.1.2"
 pytz = ">=2020.1"
 
 [tool.poetry.dev-dependencies]
