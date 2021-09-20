@@ -17,7 +17,7 @@ _FORMATS = (
 
 class WorkspaceListCommand(WorkspaceCommand):
     name = "workspace list"
-    description = "Lists projects and their dependencies."
+    description = "Lists workspace projects and their dependencies."
     help = """
 The <info>workspace list</> command lists projects in the workspace's dependency
 graph. Use flags to optionally select a subset of projects, and to output
