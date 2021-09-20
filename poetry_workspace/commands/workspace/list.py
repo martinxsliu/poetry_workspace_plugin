@@ -5,6 +5,7 @@ from cleo.helpers import option
 from poetry_workspace.commands.workspace.workspace import WorkspaceCommand
 
 if TYPE_CHECKING:
+    from cleo.io.io import IO
     from poetry.core.packages.package import Package
     from poetry.poetry import Poetry
 
@@ -45,7 +46,7 @@ external to the workspace in the dependency list."""
             return 1
         return 0
 
-    def handle_each(self, poetry: "Poetry") -> int:
+    def handle_each(self, poetry: "Poetry", _io: "IO") -> int:
         package = poetry.package
         if self.output == "topological":
             self.line(package.name)

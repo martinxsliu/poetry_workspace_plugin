@@ -1,8 +1,11 @@
+import copy
 from typing import TYPE_CHECKING, List, Optional
 
 from cleo.commands.command import Command
 from cleo.helpers import option
+from cleo.io.io import IO
 
+from poetry_workspace.formatter import WorkspaceFormatter
 from poetry_workspace.graph import DependencyGraph
 from poetry_workspace.workspace import Workspace
 
@@ -53,7 +56,7 @@ class WorkspaceCommand(Command):
                 self.line(f"Project {project.name} not found in workspace", style="error")
                 return 1
 
-            exit_code = self.handle_each(poetry)
+            exit_code = self.handle_each(poetry, self._io_for_project(project.name))
             if exit_code:
                 return exit_code
 
@@ -66,7 +69,7 @@ class WorkspaceCommand(Command):
     def pre_handle(self) -> int:
         return 0
 
-    def handle_each(self, poetry: "Poetry") -> int:
+    def handle_each(self, poetry: "Poetry", io: IO) -> int:
         """To be implemented by workspace subcommands."""
         raise NotImplementedError()
 
@@ -109,4 +112,21 @@ class WorkspaceCommand(Command):
             include_dependencies=self.option("include-dependencies"),
             include_reverse_dependencies=self.option("include-reverse-dependencies"),
             include_external=include_external,
+        )
+
+    def _io_for_project(self, name: str) -> IO:
+        formatter = WorkspaceFormatter(name, decorated=self.io.output.is_decorated())
+
+        # Shallow clone the outputs as we need to set different formatters for
+        # each project.
+        output = copy.copy(self.io.output)
+        output.set_formatter(formatter)
+
+        error_output = copy.copy(self.io.error_output)
+        error_output.set_formatter(formatter)
+
+        return IO(
+            input=self.io.input,
+            output=output,
+            error_output=error_output,
         )

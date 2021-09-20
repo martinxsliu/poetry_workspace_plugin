@@ -5,6 +5,7 @@ from poetry.console.commands.publish import PublishCommand
 from poetry_workspace.commands.workspace.workspace import WorkspaceCommand
 
 if TYPE_CHECKING:
+    from cleo.io.io import IO
     from cleo.io.inputs.option import Option
     from poetry.poetry import Poetry
 
@@ -21,7 +22,7 @@ class WorkspacePublishCommand(WorkspaceCommand):
 
     options = strip_flag_shortcuts(PublishCommand.options) + WorkspaceCommand.options
 
-    def handle_each(self, poetry: "Poetry") -> int:
+    def handle_each(self, poetry: "Poetry", io: "IO") -> int:
         cmd = PublishCommand()
         cmd.set_poetry(poetry)
-        return cmd.execute(self.io)
+        return cmd.execute(io)
