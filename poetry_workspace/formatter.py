@@ -2,7 +2,6 @@ from cleo.formatters.formatter import Formatter
 
 
 class WorkspaceFormatter(Formatter):
-
     def __init__(self, prefix: str, *args, **kwargs):
         self._prefix = prefix
         super().__init__(*args, **kwargs)

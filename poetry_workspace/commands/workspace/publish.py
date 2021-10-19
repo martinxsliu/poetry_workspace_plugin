@@ -5,8 +5,8 @@ from poetry.console.commands.publish import PublishCommand
 from poetry_workspace.commands.workspace.workspace import WorkspaceCommand
 
 if TYPE_CHECKING:
-    from cleo.io.io import IO
     from cleo.io.inputs.option import Option
+    from cleo.io.io import IO
     from poetry.poetry import Poetry
 
 

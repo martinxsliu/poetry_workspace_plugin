@@ -85,12 +85,12 @@ class DependencyGraph:
             for dep in deps[package]:
                 add_dep(acc, dep, deps)
 
-        dependencies = set()
+        dependencies: Set["Package"] = set()
         if include_dependencies:
             for package in selected:
                 add_dep(dependencies, package, self._deps)
 
-        reverse_dependencies = set()
+        reverse_dependencies: Set["Package"] = set()
         if include_reverse_dependencies:
             for package in selected:
                 add_dep(reverse_dependencies, package, self._rdeps)
@@ -112,6 +112,13 @@ def topological_sort(
     deps: Dict["Package", List["Package"]],
     rdeps: Dict["Package", List["Package"]],
 ) -> Dict["Package", int]:
+    """
+    Returns a dictionary mapping a package to its level. Levels are strictly
+    negative integers that represent the maximum number of connections from
+    the root to the package, e.g. -1 is the highest possible level and means
+    that it is a direct dependency of the root and no other transitive package
+    depends upon it.
+    """
     levels: Dict["Package", int] = defaultdict(int)
 
     def iter(package: "Package", level: int) -> None:
@@ -121,8 +128,9 @@ def topological_sort(
         for dep in deps[package]:
             iter(dep, level - 1)
 
-    for package, rdeps in rdeps.items():
-        if len(rdeps) == 0:
+    for package, package_rdeps in rdeps.items():
+        if len(package_rdeps) == 0:
+            # Begin iteration at top level deps.
             iter(package, -1)
 
     return levels

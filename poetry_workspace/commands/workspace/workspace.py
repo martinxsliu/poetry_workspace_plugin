@@ -5,6 +5,7 @@ from cleo.commands.command import Command
 from cleo.helpers import option
 from cleo.io.io import IO
 
+from poetry_workspace.errors import WorkspaceError
 from poetry_workspace.formatter import WorkspaceFormatter
 from poetry_workspace.graph import DependencyGraph
 from poetry_workspace.workspace import Workspace
@@ -35,6 +36,8 @@ class WorkspaceCommand(Command):
 
     @property
     def workspace(self) -> "Workspace":
+        if not self._workspace:
+            raise WorkspaceError("workspace not set")
         return self._workspace
 
     def set_workspace(self, workspace: "Workspace") -> None:

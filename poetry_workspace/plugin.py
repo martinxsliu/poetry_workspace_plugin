@@ -37,37 +37,37 @@ class WorkspacePlugin(ApplicationPlugin):
         self.monkeypatch_version_parser()
         self.monkeypatch_json_schema()
 
-        self._workspace = find_workspace(command.application, event.io)
-        if self._workspace is None:
+        workspace = find_workspace(command.application, event.io)
+        if workspace is None:
             return
 
         if isinstance(command, EnvCommand):
-            self.monkeypatch_env_manager()
+            self.monkeypatch_env_manager(workspace)
 
         if isinstance(command, InstallerCommand):
-            self.set_installer_poetry(command, event.io)
+            self.set_installer_poetry(command, event.io, workspace)
 
         if isinstance(command, WorkspaceCommand):
-            command.set_workspace(self._workspace)
+            command.set_workspace(workspace)
 
-    def set_installer_poetry(self, command: InstallerCommand, io: "IO") -> None:
+    def set_installer_poetry(self, command: InstallerCommand, io: "IO", workspace: Workspace) -> None:
         poetry = Poetry(
             file=BaseFactory.locate(Path.cwd()),
-            local_config=self._workspace.poetry.local_config,
-            package=self._workspace.poetry.package,
-            locker=self._workspace.poetry.locker,
-            config=self._workspace.poetry.config,
+            local_config=workspace.poetry.local_config,
+            package=workspace.poetry.package,
+            locker=workspace.poetry.locker,
+            config=workspace.poetry.config,
         )
         Factory().configure_sources(
             poetry,
             poetry.local_config.get("source", []),
-            self._workspace.poetry.config,
+            workspace.poetry.config,
             io,
         )
         command.set_poetry(poetry)
 
-    def monkeypatch_env_manager(self) -> None:
-        workspace_poetry = self._workspace.poetry
+    def monkeypatch_env_manager(self, workspace: Workspace) -> None:
+        workspace_poetry = workspace.poetry
         original_method = EnvManager.create_venv
 
         def create_venv(self, *args, **kwargs) -> Union["SystemEnv", "VirtualEnv"]:
@@ -110,6 +110,8 @@ def find_workspace(application: "Application", io: "IO") -> Optional[Workspace]:
             if project.file.path == application.poetry.file.path:
                 # Currently in a workspace project's tree.
                 return workspace
+
+    return None
 
 
 def is_workspace_pyproject(pyproject: "PyProjectTOML") -> bool:

@@ -66,6 +66,8 @@ class WorkspaceRunCommand(WorkspaceCommand, EnvCommand):
             if exit_code:
                 return exit_code
 
+        return 0
+
     def _communicate(self, proc: subprocess.Popen, io: "IO") -> int:
         stdout, stderr = proc.communicate()
         if stdout:

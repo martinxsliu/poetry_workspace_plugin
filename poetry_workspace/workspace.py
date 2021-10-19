@@ -1,5 +1,6 @@
 from glob import glob
-from typing import TYPE_CHECKING, List, Optional
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Optional, Set
 
 from poetry.core.packages.directory_dependency import DirectoryDependency
 from poetry.factory import Factory
@@ -36,6 +37,7 @@ class Workspace:
         for project in self.projects:
             if project.package.name == name:
                 return project
+        return None
 
     def _find_projects(self, pyproject: "PyProjectTOML") -> List["Poetry"]:
         content = pyproject.data["tool"]["poetry"]["workspace"]
@@ -45,7 +47,7 @@ class Workspace:
         include = content["include"]
         exclude = content.get("exclude", [])
 
-        matches = set()
+        matches: Set[str] = set()
         for pattern in include:
             pattern = str(self.poetry.file.path.parent / pattern / "pyproject.toml")
             matches = matches.union(set(glob(pattern, recursive=True)))
@@ -60,7 +62,7 @@ class Workspace:
             for path in sorted(matches):
                 self._io.write_line(f"- {path}")
 
-        return [Factory().create_poetry(path) for path in sorted(matches)]
+        return [Factory().create_poetry(Path(path)) for path in sorted(matches)]
 
     def _add_project_dependencies(self) -> None:
         requires = set(pkg.name for pkg in self.poetry.package.requires)

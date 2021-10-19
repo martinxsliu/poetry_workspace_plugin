@@ -16,6 +16,7 @@ poetry = {version = "^1.2.0a2", allow-prereleases = true}
 [tool.poetry.group.dev.dependencies]
 black = "^21.7-beta.0"
 isort = "^5.9.3"
+mypy = "^0.910"
 
 [tool.black]
 line-length = 120
@@ -25,6 +26,11 @@ include = '\.pyi?$'
 [tool.isort]
 profile = "black"
 line_length = 120
+
+[tool.mypy]
+python_version = 3.6
+platform = "linux"
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

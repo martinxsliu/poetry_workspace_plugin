@@ -1,3 +1,9 @@
+.PHONY: lint
+lint:
+	poetry run black --check poetry_workspace
+	poetry run isort --check poetry_workspace
+	poetry run mypy poetry_workspace
+
 .PHONY: fmt
 fmt:
 	poetry run black poetry_workspace
