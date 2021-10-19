@@ -59,9 +59,9 @@ external to the workspace in the dependency list."""
                 continue
 
             def get_tree(package_name: str) -> dict:
-                deps = self.graph.dependencies(package_name)
+                deps = self.workspace.graph.dependencies(package_name)
                 if not self.show_external:
-                    deps = [dep for dep in deps if self.graph.is_project_package(dep)]
+                    deps = [dep for dep in deps if self.workspace.graph.is_project_package(dep)]
                 return {dep.name: get_tree(dep.name) for dep in deps}
 
             self._project_tree[project.name] = get_tree(project.name)

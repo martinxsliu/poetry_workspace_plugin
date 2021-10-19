@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "libc"
+version = "0.1.0"
+description = ""
+authors = ["Bob <bob@bob.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+libb = {path = "../libb"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

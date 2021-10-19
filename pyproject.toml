@@ -17,6 +17,7 @@ poetry = {version = "^1.2.0a2", allow-prereleases = true}
 black = "^21.7-beta.0"
 isort = "^5.9.3"
 mypy = "^0.910"
+pytest = "^6.2.5"
 
 [tool.black]
 line-length = 120
@@ -30,6 +31,7 @@ line_length = 120
 [tool.mypy]
 python_version = 3.6
 platform = "linux"
+exclude = "tests/fixtures"
 ignore_missing_imports = true
 
 [build-system]

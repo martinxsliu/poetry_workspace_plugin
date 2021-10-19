@@ -1,13 +1,17 @@
+.PHONY: test
+test:
+	poetry run pytest tests
+
 .PHONY: lint
 lint:
-	poetry run black --check poetry_workspace
-	poetry run isort --check poetry_workspace
-	poetry run mypy poetry_workspace
+	poetry run black --check poetry_workspace tests
+	poetry run isort --check poetry_workspace tests
+	poetry run mypy poetry_workspace tests
 
 .PHONY: fmt
 fmt:
-	poetry run black poetry_workspace
-	poetry run isort poetry_workspace
+	poetry run black poetry_workspace tests
+	poetry run isort poetry_workspace tests
 
 .PHONY: reinstall
 reinstall:

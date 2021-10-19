@@ -79,21 +79,13 @@ class WorkspaceCommand(Command):
     def post_handle(self) -> int:
         return 0
 
-    @property
-    def graph(self) -> DependencyGraph:
-        if self._graph is None:
-            locked_repo = self.workspace.poetry.locker.locked_repository(with_dev_reqs=True)
-            internal_urls = [str(project.file.path.parent) for project in self.workspace.projects]
-            self._graph = DependencyGraph(locked_repo, internal_urls)
-        return self._graph
-
     def selected_projects(self, include_external: bool = False) -> List["Package"]:
         if self.option("since"):
             if self.option("project"):
                 self.line("Both --project and --since flags are provided, using --since", style="warning")
             return self.changed_projects(include_external)
 
-        return self.graph.search(
+        return self.workspace.graph.search(
             package_names=self.option("project"),
             include_dependencies=self.option("include-dependencies"),
             include_reverse_dependencies=self.option("include-reverse-dependencies"),
@@ -105,12 +97,12 @@ class WorkspaceCommand(Command):
 
         ref = self.option("since")
 
-        diff = Diff(self.workspace, self.graph, io=self.io)
+        diff = Diff(self.workspace, io=self.io)
         changed = diff.get_changed_projects(ref)
         if self.option("include-reverse-dependencies"):
             changed.extend(diff.get_changed_external(ref))
 
-        return self.graph.search(
+        return self.workspace.graph.search(
             package_names=[package.name for package in changed],
             include_dependencies=self.option("include-dependencies"),
             include_reverse_dependencies=self.option("include-reverse-dependencies"),
