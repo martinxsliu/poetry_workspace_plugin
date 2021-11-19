@@ -3,7 +3,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional
 
-from poetry.factory import Factory
+from poetry.core.pyproject.toml import PyProjectTOML
+from poetry.packages.locker import Locker
 
 from poetry_workspace.errors import VCSError
 from poetry_workspace.graph import DependencyGraph
@@ -101,14 +102,15 @@ class Diff:
             (dir_path / "pyproject.toml").write_text(old_pyproject_toml)
             (dir_path / "poetry.lock").write_text(old_poetry_lock)
 
-            poetry = Factory().create_poetry(dir_path)
+            local_config = PyProjectTOML(path=dir_path / "pyproject.toml").poetry_config
+            locker = Locker(dir_path / "poetry.lock", local_config)
             workspace_dir = self._workspace.poetry.file.parent
 
             # When creating the locked repository below, Poetry expects to find the
             # pyproject.toml or setup.py file for each of the directory dependencies.
             # Here we iterate through the lock file and try to populate those package
             # files from the old VCS reference.
-            for package_info in poetry.locker.lock_data["package"]:
+            for package_info in locker.lock_data["package"]:
                 source = package_info.get("source", {})
                 if source.get("type") != "directory":
                     continue
@@ -134,5 +136,5 @@ class Diff:
                 temp_package_path.parent.mkdir(parents=True)
                 temp_package_path.write_text(package_contents)
 
-            locked_repo = poetry.locker.locked_repository(with_dev_reqs=True)
+            locked_repo = locker.locked_repository(with_dev_reqs=True)
             return DependencyGraph(locked_repo, [])
