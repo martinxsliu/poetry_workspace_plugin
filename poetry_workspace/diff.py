@@ -22,13 +22,13 @@ class Diff:
     _io: "IO"
 
     def __init__(self, workspace: Workspace, vcs: VCS = None, io: "IO" = None):
-        self._workspace = workspace
-        self._vcs = vcs or detect_vcs()
-
         if io is None:
             from cleo.io.null_io import NullIO
 
             io = NullIO()
+
+        self._workspace = workspace
+        self._vcs = vcs or detect_vcs(io)
         self._io = io
 
     def get_changed_projects(self, ref: str) -> List["Package"]:
@@ -54,7 +54,7 @@ class Diff:
             else:
                 other_files.append(file)
 
-        if self._io.is_very_verbose():
+        if self._io.is_debug():
             for package, files in changed_projects.items():
                 self._io.write_line(f"Detected changes in project <info>{package.source_url}</info>:")
                 for file in sorted(files):
@@ -87,7 +87,7 @@ class Diff:
 
     def get_changed_files(self, ref: str) -> List[Path]:
         files = self._vcs.get_changed_files(ref)
-        if self._io.is_very_verbose():
+        if self._io.is_debug():
             self._io.write_line(f"Files changed since <info>{ref}</info>:")
             for file in files:
                 self._io.write_line(f"- {file}")

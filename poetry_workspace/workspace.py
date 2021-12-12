@@ -76,7 +76,7 @@ class Workspace:
             pattern = str(self.poetry.file.path.parent / pattern / "pyproject.toml")
             matches = matches.difference(set(glob(pattern, recursive=True)))
 
-        if self._io.is_very_verbose():
+        if self._io.is_debug():
             self._io.write_line(f"Using workspace {self.poetry.file.path}")
             self._io.write_line("Found workspace projects:")
             for path in sorted(matches):
