@@ -11,12 +11,16 @@ run_slow = "libb:main_slow"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-liba = {path = "../liba"}
+liba = {path = "../liba", develop = true}
 pendulum = "^2.1.2"
 pytz = ">=2020.1"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+pytest = "<6"
+
+[tool.poetry.group.numerical.dependencies]
+numpy = "<1.20"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.1.0a6"]
 build-backend = "poetry.core.masonry.api"

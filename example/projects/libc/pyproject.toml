@@ -11,7 +11,7 @@ run_slow = "libc:main_slow"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-libb = {path = "../libb"}
+libb = {path = "../libb", develop = true}
 pytz = "<2020.4"
 
 [tool.poetry.dev-dependencies]

@@ -1,3 +1,8 @@
+.PHONY: install
+install:
+	rm -rf .venv
+	poetry install
+
 .PHONY: test
 test:
 	poetry run pytest tests
@@ -12,12 +17,6 @@ lint:
 fmt:
 	poetry run black poetry_workspace tests
 	poetry run isort poetry_workspace tests
-
-.PHONY: reinstall
-reinstall:
-	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python - --uninstall || true
-	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python - --preview
-	poetry plugin add $(shell pwd)
 
 .PHONY: publish
 publish:

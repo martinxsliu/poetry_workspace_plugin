@@ -14,8 +14,12 @@ python = "^3.8"
 pytz = ">=2020,<2021"
 requests = "*"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+pytest = ">=5"
+
+[tool.poetry.group.numerical.dependencies]
+numpy = ">=1"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.1.0a6"]
 build-backend = "poetry.core.masonry.api"

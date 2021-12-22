@@ -92,6 +92,7 @@ class Workspace:
             if name in requires:
                 continue
 
+            # Add workspace project as an editable path dependency.
             self.poetry.package.add_dependency(
                 DirectoryDependency(
                     name=name,
@@ -99,6 +100,14 @@ class Workspace:
                     develop=True,
                 )
             )
+
+            for group_name, group in project.package._dependency_groups.items():
+                if group_name == "default":
+                    # Ignore the default group, they will be added as transitive dependencies
+                    # of the workspace project.
+                    continue
+                for dependency in group.dependencies:
+                    self.poetry.package.add_dependency(dependency)
 
 
 def is_workspace_pyproject(pyproject: "PyProjectTOML") -> bool:
