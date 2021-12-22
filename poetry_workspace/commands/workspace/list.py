@@ -5,9 +5,7 @@ from cleo.helpers import option
 from poetry_workspace.commands.workspace.workspace import WorkspaceCommand
 
 if TYPE_CHECKING:
-    from cleo.io.io import IO
     from poetry.core.packages.package import Package
-    from poetry.poetry import Poetry
 
 _FORMATS = (
     "topological",

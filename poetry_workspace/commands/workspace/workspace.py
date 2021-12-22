@@ -7,7 +7,6 @@ from cleo.io.io import IO
 
 from poetry_workspace.errors import WorkspaceError
 from poetry_workspace.formatter import WorkspaceFormatter
-from poetry_workspace.graph import DependencyGraph
 from poetry_workspace.workspace import Workspace
 
 if TYPE_CHECKING:
@@ -26,11 +25,9 @@ class WorkspaceCommand(Command):
     ]
 
     _workspace: Optional["Workspace"]
-    _graph: Optional[DependencyGraph]
 
     def __init__(self) -> None:
         self._workspace = None
-        self._graph = None
 
         super().__init__()
 
@@ -42,7 +39,6 @@ class WorkspaceCommand(Command):
 
     def set_workspace(self, workspace: "Workspace") -> None:
         self._workspace = workspace
-        self._graph = None
 
     def handle(self) -> int:
         if not self.workspace:
@@ -101,6 +97,9 @@ class WorkspaceCommand(Command):
         changed = diff.get_changed_projects(ref)
         if self.option("include-reverse-dependencies"):
             changed.extend(diff.get_changed_external(ref))
+
+        if not changed:
+            return []
 
         return self.workspace.graph.search(
             package_names=[package.name for package in changed],

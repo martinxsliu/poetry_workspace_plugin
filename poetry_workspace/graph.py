@@ -69,7 +69,7 @@ class DependencyGraph:
         include_reverse_dependencies: bool = False,
         include_external: bool = False,
     ) -> List["Package"]:
-        if package_names is None:
+        if not package_names:
             if include_external:
                 return self._sorted
             return [package for package in self._sorted if self.is_project_package(package)]
