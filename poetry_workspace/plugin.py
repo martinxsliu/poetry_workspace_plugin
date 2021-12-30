@@ -82,7 +82,8 @@ class WorkspacePlugin(ApplicationPlugin):
         original_method = PEP440Version.parse
 
         def parse(cls, value: str):
-            value = value.rstrip(".")
+            if value:
+                value = value.rstrip(".")
             return original_method.__func__(cls, value)
 
         PEP440Version.parse = classmethod(parse)
