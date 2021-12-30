@@ -1,5 +1,3 @@
-import os
-import shutil
 from pathlib import Path
 
 import pytest
@@ -10,33 +8,8 @@ from poetry.core.pyproject.toml import PyProjectTOML
 from poetry_workspace.diff import Diff
 from poetry_workspace.vcs.git import Git
 from poetry_workspace.workspace import Workspace
-from tests.conftest import assert_packages
+from tests.conftest import assert_packages, sync_dir
 from tests.vcs import git_util
-
-
-def sync_dir(src: Path, dst: Path) -> None:
-    # First, clear up dst directory.
-    for name in os.listdir(dst):
-        if name in (".git"):
-            continue
-
-        path = dst / name
-        if os.path.isfile(path) or os.path.islink(path):
-            os.unlink(path)
-        elif os.path.isdir(path):
-            shutil.rmtree(path)
-
-    # Now copy over all contents of src.
-    for name in os.listdir(src):
-        if name in (".venv", "__pycache__"):
-            continue
-
-        src_path = src / name
-        dst_path = dst / name
-        if os.path.isfile(src_path) or os.path.islink(src_path):
-            shutil.copyfile(src_path, dst_path)
-        elif os.path.isdir(src_path):
-            shutil.copytree(src_path, dst_path)
 
 
 @pytest.fixture()

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from cleo.events.console_events import COMMAND
 from poetry.console.commands.installer_command import EnvCommand, InstallerCommand
@@ -9,7 +9,6 @@ from poetry.core.version.pep440.version import PEP440Version
 from poetry.factory import Factory
 from poetry.plugins import ApplicationPlugin
 from poetry.poetry import Poetry
-from poetry.utils.env import EnvManager, SystemEnv, VirtualEnv
 
 from poetry_workspace.commands import loader
 from poetry_workspace.commands.workspace.workspace import WorkspaceCommand
@@ -32,61 +31,94 @@ class WorkspacePlugin(ApplicationPlugin):
     def on_command(self, event: "ConsoleCommandEvent", _event_name: str, _dispatcher: "EventDispatcher") -> None:
         command = event.command
 
-        self.monkeypatch_version_parser()
+        monkeypatch_version_parser()
 
         workspace = find_workspace(command.application, event.io)
         if workspace is None:
             return
 
         if isinstance(command, EnvCommand):
-            self.monkeypatch_env_manager(workspace)
+            monkeypatch_env_manager(workspace)
 
         if isinstance(command, InstallerCommand):
-            self.set_installer_poetry(command, event.io, workspace)
+            set_installer_poetry(command, event.io, workspace)
+            monkeypatch_version_solver(workspace)
 
         if isinstance(command, WorkspaceCommand):
             command.set_workspace(workspace)
 
-    def set_installer_poetry(self, command: InstallerCommand, io: "IO", workspace: Workspace) -> None:
-        poetry = Poetry(
-            file=BaseFactory.locate(Path.cwd()),
-            local_config=workspace.poetry.local_config,
-            package=workspace.poetry.package,
-            locker=workspace.poetry.locker,
-            config=workspace.poetry.config,
-        )
-        Factory().configure_sources(
-            poetry,
-            poetry.local_config.get("source", []),
-            workspace.poetry.config,
-            io,
-        )
-        command.set_poetry(poetry)
 
-    def monkeypatch_env_manager(self, workspace: Workspace) -> None:
-        workspace_poetry = workspace.poetry
-        original_method = EnvManager.create_venv
+def set_installer_poetry(command: InstallerCommand, io: "IO", workspace: Workspace) -> None:
+    poetry = Poetry(
+        file=BaseFactory.locate(Path.cwd()),
+        local_config=workspace.poetry.local_config,
+        package=workspace.poetry.package,
+        locker=workspace.poetry.locker,
+        config=workspace.poetry.config,
+    )
+    Factory().configure_sources(
+        poetry,
+        poetry.local_config.get("source", []),
+        workspace.poetry.config,
+        io,
+    )
+    command.set_poetry(poetry)
 
-        def create_venv(self, *args, **kwargs) -> Union["SystemEnv", "VirtualEnv"]:
-            # Set env manager's Poetry instance to the workspace Poetry instance
-            # so that it creates and uses a workspace level virtualenv.
-            self._poetry = workspace_poetry
-            return original_method(self, *args, **kwargs)
 
-        EnvManager.create_venv = create_venv
+def monkeypatch_env_manager(workspace: Workspace) -> None:
+    from poetry.utils.env import EnvManager, SystemEnv, VirtualEnv
 
-    def monkeypatch_version_parser(self) -> None:
-        """
-        Workaround for https://github.com/python-poetry/poetry/issues/4176.
-        """
-        original_method = PEP440Version.parse
+    workspace_poetry = workspace.poetry
+    original_method = EnvManager.create_venv
 
-        def parse(cls, value: str):
-            if value:
-                value = value.rstrip(".")
-            return original_method.__func__(cls, value)
+    def create_venv(self: EnvManager, *args: Any, **kwargs: Any) -> Union[SystemEnv, VirtualEnv]:
+        # Set env manager's Poetry instance to the workspace Poetry instance
+        # so that it creates and uses a workspace level virtualenv.
+        self._poetry = workspace_poetry
+        return original_method(self, *args, **kwargs)
 
-        PEP440Version.parse = classmethod(parse)
+    EnvManager.create_venv = create_venv
+
+
+def monkeypatch_version_solver(workspace: Workspace) -> None:
+    """
+    Normally if a workspace project's dependencies are changed, then the workspace
+    will resolve the changed dependencies if an update operation was performed for
+    the workspace project (e.g. `poetry lock`, `poetry update`, or `poetry update
+    foo`). If an update operation was not performed (e.g. `poetry lock --no-update`,
+    or `poetry update not-foo`) then the changed dependencies will not be resolved.
+
+    We want to resolve workspace project dependencies all the time as if they are
+    direct dependencies of the workspace root project, regardless of whether an
+    update was performed or not. This method monkey patches the `VersionSolver` class
+    so that all workspace projects are included in the `use_latest` list to ensure
+    that the resolver always uses the latest version of workspace projects.
+    """
+    from poetry.mixology.result import SolverResult
+    from poetry.mixology.version_solver import VersionSolver
+
+    original_method = VersionSolver.solve
+    workspace_packages = set(project.package.name for project in workspace.projects)
+
+    def solve(self: VersionSolver) -> SolverResult:
+        self._use_latest = sorted(set(self._use_latest) | workspace_packages)
+        return original_method(self)
+
+    VersionSolver.solve = solve
+
+
+def monkeypatch_version_parser() -> None:
+    """
+    Workaround for https://github.com/python-poetry/poetry/issues/4176.
+    """
+    original_method = PEP440Version.parse
+
+    def parse(cls, value: str):
+        if value:
+            value = value.rstrip(".")
+        return original_method.__func__(cls, value)
+
+    PEP440Version.parse = classmethod(parse)
 
 
 def find_workspace(application: "Application", io: "IO") -> Optional[Workspace]:

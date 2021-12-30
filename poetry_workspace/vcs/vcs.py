@@ -10,6 +10,10 @@ class VCS:
         self._root = root.resolve()
         self._io = io
 
+    @property
+    def root(self) -> Path:
+        return self._root
+
     def get_changed_files(self, ref: str) -> List[Path]:
         raise NotImplementedError()
 

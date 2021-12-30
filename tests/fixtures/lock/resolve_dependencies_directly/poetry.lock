@@ -1,0 +1,53 @@
+[[package]]
+name = "liba"
+version = "0.1.0"
+description = ""
+category = "main"
+optional = false
+python-versions = "^3.6"
+develop = true
+
+[package.dependencies]
+pytz = ">=2019,<2021"
+
+[package.source]
+type = "directory"
+url = "projects/liba"
+
+[[package]]
+name = "libb"
+version = "0.1.0"
+description = ""
+category = "main"
+optional = false
+python-versions = "^3.6"
+develop = true
+
+[package.dependencies]
+liba = {path = "../liba", develop = true}
+pytz = "<2020.4"
+
+[package.source]
+type = "directory"
+url = "projects/libb"
+
+[[package]]
+name = "pytz"
+version = "2020.1"
+description = "World timezone definitions, modern and historical"
+category = "main"
+optional = false
+python-versions = "*"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "^3.6"
+content-hash = "50939ecdc645332d6d6d2daa4ab974cf6816d17793584110983d5abf51fe527b"
+
+[metadata.files]
+liba = []
+libb = []
+pytz = [
+    {file = "pytz-2020.1-py2.py3-none-any.whl", hash = "sha256:a494d53b6d39c3c6e44c3bec237336e14305e4f29bbf800b599253057fbb79ed"},
+    {file = "pytz-2020.1.tar.gz", hash = "sha256:c35965d010ce31b23eeb663ed3cc8c906275d6be1a34393a1d73a41febf4a048"},
+]
