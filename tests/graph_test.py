@@ -16,7 +16,12 @@ def graph() -> DependencyGraph:
             "internal/c": ["b"],
         }
     )
-    return DependencyGraph(repo, ["internal"])
+    workspace_packages = [
+        repo.package("a", "1.0"),
+        repo.package("b", "1.0"),
+        repo.package("c", "1.0"),
+    ]
+    return DependencyGraph(repo, workspace_packages)
 
 
 def test_iter(graph: DependencyGraph) -> None:

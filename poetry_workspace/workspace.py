@@ -49,8 +49,7 @@ class Workspace:
     def graph(self) -> DependencyGraph:
         if self._graph is None:
             locked_repo = self.poetry.locker.locked_repository(with_dev_reqs=True)
-            internal_urls = [str(project.file.path.parent) for project in self.projects]
-            self._graph = DependencyGraph(locked_repo, internal_urls)
+            self._graph = DependencyGraph(locked_repo, [p.package for p in self.projects])
         return self._graph
 
     def find_project(self, name: str) -> Optional["Poetry"]:

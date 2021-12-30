@@ -10,22 +10,27 @@ if TYPE_CHECKING:
 
 class DependencyGraph:
     _repo: "Repository"
-    _internal_urls: Set[str]
+    _workspace_packages: Dict[str, "Package"]
     _deps: Dict["Package", List["Package"]]
     _rdeps: Dict["Package", List["Package"]]
     _levels: Dict["Package", int]
     _sorted: List["Package"]
 
-    def __init__(self, repo: "Repository", internal_urls: List[str]):
+    def __init__(self, repo: "Repository", workspace_packages: List["Package"]):
         self._repo = repo
-        self._internal_urls = set(internal_urls)
+        self._workspace_packages = {package.name: package for package in workspace_packages}
         self._deps = {}
         self._rdeps = {}
 
-        # Ensure that all keys exist.
         for package in repo.packages:
+            # Ensure that all keys exist.
             self._deps[package] = []
             self._rdeps[package] = []
+
+            # Add non-default dependency groups.
+            workspace_package = self._workspace_packages.get(package.name)
+            if workspace_package:
+                package._dependency_groups = workspace_package._dependency_groups
 
         for package in repo.packages:
             for dep in package.all_requires:
@@ -54,7 +59,7 @@ class DependencyGraph:
         return len(found) > 0
 
     def is_project_package(self, package: "Package") -> bool:
-        return package.source_url in self._internal_urls
+        return package.name in self._workspace_packages
 
     def dependencies(self, name: str) -> List["Package"]:
         return self._deps[self.find_package(name)]

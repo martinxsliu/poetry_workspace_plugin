@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poetry-workspace-plugin"
-version = "0.5.2"
+version = "0.5.3"
 description = "Multi project workspace plugin for Poetry"
 authors = ["Martin Liu <martin.xs.liu@gmail.com>"]
 readme = "README.md"

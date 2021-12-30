@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "liba"
+version = "0.1.0"
+description = ""
+authors = ["Bob <bob@bob.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+pytz = ">=2019,<2021"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "<6"
+
+[tool.poetry.group.numerical.dependencies]
+numpy = "<1.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
